@@ -1,9 +1,9 @@
 import App from './app';
-import * as dotenv from 'dotenv'
+import * as dotenv from 'dotenv';
 
-dotenv.config()
+dotenv.config();
 
-const PORT = process.env.PORT || 8800;
+const PORT = process.env.PORT || 8700;
 
 const app: App = new App();
 
