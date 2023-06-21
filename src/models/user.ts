@@ -1,6 +1,8 @@
 import * as mongoose from 'mongoose';
+import * as express from 'express';
+import { BcryptHelpers } from '../helpers/bcrypt';
 
-const user = new mongoose.Schema(
+const user = new mongoose.Schema<IUser>(
     {
         username: String,
         firstname: String,
@@ -21,5 +23,13 @@ const user = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+user.pre('save', async function (next: express.NextFunction) {
+    if (!this.isModified('password')) next();
+
+    this.password = await BcryptHelpers.hashPassword(this.password);
+
+    next();
+});
 
 export const User = mongoose.model<IUser>('users', user);

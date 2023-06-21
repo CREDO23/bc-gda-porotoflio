@@ -12,7 +12,7 @@ interface IUser {
     password: string;
     email: string;
     phoneNumber: string;
-    roles: string;
+    roles: string[];
     country: string;
     city: string;
     adress_line1: string;

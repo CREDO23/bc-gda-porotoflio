@@ -8,6 +8,7 @@ import * as http from 'http';
 import { dbConnection } from './configs/database';
 import * as dotenv from 'dotenv';
 import * as httpError from 'http-errors';
+import { authRouter } from './routes/auth';
 
 dotenv.config();
 
@@ -41,7 +42,8 @@ export default class App {
     }
 
     public routes(): void {
-        this.app.get("/api", this.baseRoute);
+        this.app.get('/api', this.baseRoute);
+        this.app.use('/api/auth/', authRouter);
     }
 
     private errorsHandlers(): void {
