@@ -9,6 +9,8 @@ import { dbConnection } from './configs/database';
 import * as dotenv from 'dotenv';
 import * as httpError from 'http-errors';
 import { authRouter } from './routes/auth';
+import { userRouter } from './routes/user';
+import { tokenGuard } from './middlewares/tokenGuard';
 
 dotenv.config();
 
@@ -44,6 +46,8 @@ export default class App {
     public routes(): void {
         this.app.get('/api', this.baseRoute);
         this.app.use('/api/auth/', authRouter);
+        this.app.use(tokenGuard);
+        this.app.use('/api/users/', userRouter);
     }
 
     private errorsHandlers(): void {

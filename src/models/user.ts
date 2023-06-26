@@ -4,6 +4,7 @@ import { BcryptHelpers } from '../helpers/bcrypt';
 
 const user = new mongoose.Schema<IUser>(
     {
+        id: mongoose.Types.ObjectId,
         username: String,
         firstname: String,
         lastname: String,
@@ -11,8 +12,8 @@ const user = new mongoose.Schema<IUser>(
         email: String,
         phoneNumber: String,
         roles: {
-            type: [mongoose.Types.ObjectId],
-            ref: 'userRoles',
+            type: [String],
+            default: ['customer'],
         },
         country: String,
         city: String,

@@ -6,9 +6,10 @@
   "scripts": {
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "start:prod" : "node dist/index.js",
+    "build": "yarn install && tsc",
+    "test": "echo Waiting for tests to execute",
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint --fix src/**/*.ts",
-    "build": "yarn install && tsc",
     "prepare-husky": "npx husky install"
   },
   "repository": {

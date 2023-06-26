@@ -6,7 +6,7 @@ import { JWTHelpers } from '../helpers/jwt';
 import { JOIUserValidation } from '../helpers/joi';
 import { BcryptHelpers } from '../helpers/bcrypt';
 
-export class Auth {
+export class AuthControllers {
     static register = async (
         req: express.Request,
         res: express.Response,
@@ -29,13 +29,12 @@ export class Auth {
                 ...result,
             });
 
-            const accessToken = await JWTHelpers.signAccessToken({
-                id: newUser.id,
-                username: newUser.username,
-                roles: newUser.roles,
-            });
-
             const savedUser = await newUser.save();
+
+            const accessToken = await JWTHelpers.signAccessToken({
+                id: savedUser._id,
+                username: savedUser.username,
+            });
 
             res.json(<IClientResponse>{
                 message: 'User created successfully',
@@ -43,6 +42,8 @@ export class Auth {
                     user: savedUser,
                     accessToken,
                 },
+                error: null,
+                success: true,
             });
         } catch (error) {
             if (error.isJoi) error.status = 422;
@@ -70,10 +71,11 @@ export class Auth {
 
                 if (isMatch) {
                     const accessToken = await JWTHelpers.signAccessToken({
-                        id: user.id,
+                        id: user._id,
                         username: user.username,
-                        roles: user.roles,
                     });
+
+                    console.log(accessToken);
 
                     res.json(<IClientResponse>{
                         message: `Logged as ${user.username}`,
@@ -81,6 +83,8 @@ export class Auth {
                             user,
                             accessToken,
                         },
+                        error: null,
+                        success: true,
                     });
                 } else {
                     throw error.NotFound('username or password incorrect');
