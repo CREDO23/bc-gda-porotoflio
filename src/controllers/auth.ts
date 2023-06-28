@@ -31,10 +31,13 @@ export class AuthControllers {
 
             const savedUser = await newUser.save();
 
-            const accessToken = await JWTHelpers.signAccessToken({
-                id: savedUser._id,
-                username: savedUser.username,
-            });
+            const accessToken = await JWTHelpers.signAccessToken(
+                {
+                    id: savedUser._id,
+                    username: savedUser.username,
+                },
+                process.env.ACCESS_TOKEN_SECRET_KEY
+            );
 
             res.json(<IClientResponse>{
                 message: 'User created successfully',
@@ -70,10 +73,13 @@ export class AuthControllers {
                 );
 
                 if (isMatch) {
-                    const accessToken = await JWTHelpers.signAccessToken({
-                        id: user._id,
-                        username: user.username,
-                    });
+                    const accessToken = await JWTHelpers.signAccessToken(
+                        {
+                            id: user._id,
+                            username: user.username,
+                        },
+                        process.env.ACCESS_TOKEN_SECRET_KEY
+                    );
 
                     console.log(accessToken);
 
