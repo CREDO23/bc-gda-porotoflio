@@ -11,6 +11,7 @@ import * as httpError from 'http-errors';
 import { authRouter } from './routes/auth';
 import { userRouter } from './routes/user';
 import { tokenGuard } from './middlewares/tokenGuard';
+import { passwordRouter } from './routes/password';
 
 dotenv.config();
 
@@ -21,9 +22,9 @@ export default class App {
 
     public async init(): Promise<void> {
         this.middleWares();
-        this.connectDb();
         this.routes();
         this.errorsHandlers();
+        return this.connectDb();
     }
 
     private connectDb(): void {
@@ -46,6 +47,7 @@ export default class App {
     public routes(): void {
         this.app.get('/api', this.baseRoute);
         this.app.use('/api/auth/', authRouter);
+        this.app.use('/api/password', passwordRouter);
         this.app.use(tokenGuard);
         this.app.use('/api/users/', userRouter);
     }

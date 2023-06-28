@@ -17,7 +17,8 @@ export const tokenGuard = async (
 
         if (token) {
             const decodedUser: jwt.JwtPayload = await JWTHelpers.verifyToken(
-                token
+                token,
+                process.env.ACCESS_TOKEN_SECRET_KEY
             );
 
             req.user = decodedUser;

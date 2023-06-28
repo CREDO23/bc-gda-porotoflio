@@ -1,11 +1,14 @@
 import * as jwt from 'jsonwebtoken';
 
 export class JWTHelpers {
-    static signAccessToken = (payload: object): Promise<string> => {
+    static signAccessToken = (
+        payload: object,
+        KEY: string
+    ): Promise<string> => {
         return new Promise<string>((resolve, reject) => {
             jwt.sign(
                 payload,
-                process.env.ACCESS_TOKEN_SECRET_KEY,
+                KEY,
                 {
                     expiresIn: '25d',
                 },
@@ -20,19 +23,18 @@ export class JWTHelpers {
         });
     };
 
-    static verifyToken = (token: string): Promise<jwt.JwtPayload> => {
+    static verifyToken = (
+        token: string,
+        KEY: string
+    ): Promise<jwt.JwtPayload> => {
         return new Promise<jwt.JwtPayload>((resolve, reject) => {
-            jwt.verify(
-                token,
-                process.env.ACCESS_TOKEN_SECRET_KEY,
-                (err, decoded) => {
-                    if (err) {
-                        reject(err);
-                    }
-
-                    resolve(decoded as jwt.JwtPayload);
+            jwt.verify(token, KEY, (err, decoded) => {
+                if (err) {
+                    reject(err);
                 }
-            );
+
+                resolve(decoded as jwt.JwtPayload);
+            });
         });
     };
 }
