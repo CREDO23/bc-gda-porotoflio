@@ -2,10 +2,10 @@
 import { User } from '../models/user';
 import { Request, Response, NextFunction } from 'express';
 import { signResetPasswordToken } from '../helpers/password';
-import sendResetPasswordMail from '../helpers/nodemailer/forgotPassword';
+import forgotPasswordMail from '../helpers/nodemailer/forgotPassword';
 import * as dotenv from 'dotenv';
 import * as error from 'http-errors';
-import sendResetPasswordEmail from '../helpers/nodemailer/resetPassword';
+import resetPasswordEmail from '../helpers/nodemailer/resetPassword';
 import { JWTHelpers } from '../helpers/jwt';
 import { BcryptHelpers } from '../helpers/bcrypt';
 
@@ -30,10 +30,10 @@ export class PasswordRecovery {
 
                 const link = `${process.env.FRONTEND_URL}/password/forgot/${token}`;
 
-                const emailSent = await sendResetPasswordMail(
+                const emailSent = await forgotPasswordMail.send(
                     user,
-                    link,
-                    'Forgot Password'
+                    'Forgot Password',
+                    { link, receiver: user.username }
                 );
 
                 if (emailSent) {
@@ -84,10 +84,10 @@ export class PasswordRecovery {
                 if (user) {
                     const link = `${process.env.FRONTEND_URL}/login`;
 
-                    const emailSent = await sendResetPasswordEmail(
+                    const emailSent = await resetPasswordEmail.send(
                         user,
-                        link,
-                        'Password update'
+                        'Reset Password',
+                        { link, receiver: user.username }
                     );
 
                     if (emailSent) {

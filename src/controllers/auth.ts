@@ -5,6 +5,7 @@ import { User } from '../models/user';
 import { JWTHelpers } from '../helpers/jwt';
 import { JOIUserValidation } from '../helpers/joi';
 import { BcryptHelpers } from '../helpers/bcrypt';
+import welcomeMail from '../helpers/nodemailer/welcome';
 
 export class AuthControllers {
     static register = async (
@@ -38,6 +39,10 @@ export class AuthControllers {
                 },
                 process.env.ACCESS_TOKEN_SECRET_KEY
             );
+
+            await welcomeMail.send(savedUser, 'Welcome', {
+                receiver: savedUser.username,
+            });
 
             res.json(<IClientResponse>{
                 message: 'User created successfully',

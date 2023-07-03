@@ -45,7 +45,7 @@ export default class App {
     }
 
     public routes(): void {
-        this.app.get('/api', this.baseRoute);
+        this.app.get('/', this.baseRoute);
         this.app.use('/api/auth/', authRouter);
         this.app.use('/api/password', passwordRouter);
         this.app.use(tokenGuard);
