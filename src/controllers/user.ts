@@ -6,29 +6,37 @@ import { JOIUserValidation } from '../helpers/joi';
 
 export class UserControllers {
     static getUser = async (
-        req: express.Request,
+        req: IUserRequest,
         res: express.Response,
         next: express.NextFunction
     ): Promise<void> => {
         try {
             const { id } = req.params;
 
-            const user = await User.findById(id).select({
-                password: 0,
-                createdAt: 0,
-                updatedAt: 0,
-            });
+            const user = await User.findById(id);
 
-            if (!user) {
-                throw error.NotFound('User not found');
+            const requestId = req.user.id;
+
+            if (user._id == requestId) {
+                const usr = await User.findById(id).select({
+                    password: 0,
+                    createdAt: 0,
+                    updatedAt: 0,
+                });
+
+                if (!user) {
+                    throw error.NotFound('User not found');
+                }
+
+                res.json(<IClientResponse>{
+                    message: 'User',
+                    data: usr,
+                    error: null,
+                    success: true,
+                });
+            } else {
+                throw error.Unauthorized('Unauthorized request');
             }
-
-            res.json(<IClientResponse>{
-                message: 'User',
-                data: user,
-                error: null,
-                success: true,
-            });
         } catch (error) {
             next(error);
         }
