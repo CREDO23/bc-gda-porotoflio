@@ -6,7 +6,8 @@
   "scripts": {
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "start:prod": "node dist/index.js",
-    "build": "yarn install && tsc",
+    "cp-hbs": "cp -r src/helpers/nodemailer/views dist/helpers/nodemailer",
+    "build": "yarn install && tsc && yarn cp-hbs",
     "test": "docker-compose up --build --renew-anon-volumes --abort-on-container-exit && docker-compose down",
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint --fix src/**/*.ts",
