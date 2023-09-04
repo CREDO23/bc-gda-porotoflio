@@ -2,7 +2,8 @@
 import * as error from 'http-errors';
 import * as express from 'express';
 import { User } from '../models/user';
-import { JOIUserValidation } from '../helpers/joi';
+import { JOIUserValidation } from '../helpers/joi/user';
+import mongoose from 'mongoose';
 
 export class UserControllers {
     static getUser = async (
@@ -13,29 +14,33 @@ export class UserControllers {
         try {
             const { id } = req.params;
 
-            const user = await User.findById(id);
+            if (mongoose.isValidObjectId(id)) {
+                const user = await User.findById(id);
 
-            const requestId = req.user.id;
+                const requestId = req.user.id;
 
-            if (user._id == requestId) {
-                const usr = await User.findById(id).select({
-                    password: 0,
-                    createdAt: 0,
-                    updatedAt: 0,
-                });
+                if (user._id == requestId) {
+                    const usr = await User.findById(id).select({
+                        password: 0,
+                        createdAt: 0,
+                        updatedAt: 0,
+                    });
 
-                if (!user) {
-                    throw error.NotFound('User not found');
+                    if (!user) {
+                        throw error.NotFound('User not found');
+                    }
+
+                    res.json(<IClientResponse>{
+                        message: 'User',
+                        data: usr,
+                        error: null,
+                        success: true,
+                    });
+                } else {
+                    throw error.Unauthorized('Unauthorized request');
                 }
-
-                res.json(<IClientResponse>{
-                    message: 'User',
-                    data: usr,
-                    error: null,
-                    success: true,
-                });
             } else {
-                throw error.Unauthorized('Unauthorized request');
+                throw error.NotAcceptable('Invalid user id');
             }
         } catch (error) {
             next(error);
@@ -54,16 +59,21 @@ export class UserControllers {
                 updatedAt: 0,
             });
 
-            if (!users) {
-                throw error.NotFound('Not users yet');
+            if (users.length) {
+                res.json(<IClientResponse>{
+                    message: 'users',
+                    data: users,
+                    error: null,
+                    success: true,
+                });
+            } else {
+                res.json(<IClientResponse>{
+                    message: 'Not users yets',
+                    data: [],
+                    error: null,
+                    success: true,
+                });
             }
-
-            res.json(<IClientResponse>{
-                message: 'users',
-                data: users,
-                error: null,
-                success: true,
-            });
         } catch (error) {
             next(error);
         }
