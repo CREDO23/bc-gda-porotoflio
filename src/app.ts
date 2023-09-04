@@ -11,6 +11,7 @@ import * as httpError from 'http-errors';
 import { authRouter } from './routes/auth';
 import { userRouter } from './routes/user';
 import { shopCategoriesRouter } from './routes/shopCategory';
+import { paymentMethodsRouter } from './routes/paymentMethod';
 import { tokenGuard } from './middlewares/tokenGuard';
 import { passwordRouter } from './routes/password';
 
@@ -52,6 +53,7 @@ export default class App {
         // this.app.use(tokenGuard);
         this.app.use('/api/users/', userRouter);
         this.app.use('/api/shop_categories', shopCategoriesRouter);
+        this.app.use('/api/payment_methods', paymentMethodsRouter);
     }
 
     private errorsHandlers(): void {
