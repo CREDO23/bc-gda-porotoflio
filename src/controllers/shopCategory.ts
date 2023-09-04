@@ -27,7 +27,7 @@ export class ShopCategoryControllers {
                 const savedCategory = await newCategory.save();
 
                 res.json(<IClientResponse>{
-                    message: 'Category saved',
+                    message: 'Category created successfully',
                     data: savedCategory,
                     error: null,
                     success: true,
