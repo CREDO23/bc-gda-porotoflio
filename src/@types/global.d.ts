@@ -17,12 +17,44 @@ declare global {
         lastname: string;
         password: string;
         email: string;
+        imageUrl: string;
         phoneNumber: string;
-        roles: string[];
+        roles: mongoose.Types.ObjectId[];
+        shops: mongoose.Types.ObjectId[];
         country: string;
         city: string;
         adress_line1: string;
         adress_line2: string;
+    }
+
+    interface IShop {
+        id: mongoose.Types.ObjectId;
+        shopName: string;
+        shopCategory: mongoose.Types.ObjectId;
+        description: string;
+        imageUrl: string;
+        gallery: string[];
+        paymentMethods: mongoose.Types.ObjectId[];
+        products: mongoose.Types.ObjectId[];
+        owner: mongoose.Types.ObjectId;
+    }
+
+    interface IPaymentMethod {
+        id: mongoose.Types.ObjectId;
+        name: string;
+        description: string;
+    }
+
+    interface IShopCategory {
+        id: mongoose.Types.ObjectId;
+        name: string;
+        description: string;
+    }
+
+    interface IUserRole {
+        id: mongoose.Types.ObjectId;
+        name: string;
+        description: string;
     }
 
     interface IUserRequest extends express.Request {

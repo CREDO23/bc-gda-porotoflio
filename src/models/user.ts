@@ -12,8 +12,7 @@ const user = new mongoose.Schema<IUser>(
         email: String,
         phoneNumber: String,
         roles: {
-            type: [String],
-            default: ['customer'],
+            type: [mongoose.Types.ObjectId],
         },
         country: String,
         city: String,
