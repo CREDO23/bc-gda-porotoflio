@@ -24,7 +24,7 @@ export class ShopControllers {
             });
 
             if (!isExist[0]) {
-                const { category: shopCategory } = result;
+                const { category: shopCategory, paymentMethods } = result;
 
                 const category = await ShopCategory.findById(shopCategory);
 
