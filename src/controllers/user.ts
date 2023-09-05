@@ -2,7 +2,7 @@
 import * as error from 'http-errors';
 import * as express from 'express';
 import { User } from '../models/user';
-import { JOIUserValidation } from '../helpers/joi/user';
+import { JOIUserValidation } from '../helpers/joi/joi';
 import mongoose from 'mongoose';
 
 export class UserControllers {

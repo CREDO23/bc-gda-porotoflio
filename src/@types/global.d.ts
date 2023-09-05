@@ -29,14 +29,15 @@ declare global {
 
     interface IShop {
         id: mongoose.Types.ObjectId;
-        shopName: string;
-        shopCategory: mongoose.Types.ObjectId;
+        name: string;
+        category: mongoose.Types.ObjectId;
         description: string;
         imageUrl: string;
         gallery: string[];
         paymentMethods: mongoose.Types.ObjectId[];
         products: mongoose.Types.ObjectId[];
         owner: mongoose.Types.ObjectId;
+        status: 'CREATED' | 'PUBLISHED';
     }
 
     interface IPaymentMethod {
