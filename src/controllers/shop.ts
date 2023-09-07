@@ -1,39 +1,49 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as error from 'http-errors';
 import * as express from 'express';
-import { PaymentMethod } from '../models/paymentMethod';
 import mongoose from 'mongoose';
-import { JOIPaymentMethodValidation } from '../helpers/joi/paymentMethod';
+import { Shop } from '../models/shop';
+import { JOIShopValidation } from '../helpers/joi/shop';
+import { ShopCategory } from '../models/shopCategory';
 
-export class PaymentMethodControllers {
+export class ShopControllers {
     static create = async (
-        req: express.Request,
+        req: IUserRequest,
         res: express.Response,
         next: express.NextFunction
     ): Promise<void> => {
         try {
-            const result: IPaymentMethod =
-                await JOIPaymentMethodValidation.create.validateAsync(req.body);
+            const result: IShop = await JOIShopValidation.create.validateAsync(
+                req.body
+            );
 
-            const isExist = await PaymentMethod.find({
+            const isExist = await Shop.find({
                 name: {
                     $regex: new RegExp(result.name, 'i'),
                 },
             });
 
             if (!isExist[0]) {
-                const newPaymentMethod = new PaymentMethod({ ...result });
+                const { category: shopCategory, paymentMethods } = result;
 
-                const savedPaymentMethod = await newPaymentMethod.save();
+                const category = await ShopCategory.findById(shopCategory);
+
+                if (!category) {
+                    throw error.NotFound('Shop category not found');
+                }
+
+                const newShop = new Shop({ ...result, owner: req.user.id });
+
+                const savedShop = await newShop.save();
 
                 res.json(<IClientResponse>{
-                    message: 'Payment method created successfully',
-                    data: savedPaymentMethod,
+                    message: 'Shop created successfully',
+                    data: savedShop,
                     error: null,
                     success: true,
                 });
             } else {
-                throw error.Conflict('Payment method already exist');
+                throw error.Conflict('Shop already exist');
             }
         } catch (error) {
             next(error);
@@ -46,18 +56,18 @@ export class PaymentMethodControllers {
         next: express.NextFunction
     ): Promise<void> => {
         try {
-            const paymentMethods = await PaymentMethod.find({});
+            const shops = await Shop.find({});
 
-            if (paymentMethods.length) {
+            if (shops.length) {
                 res.json(<IClientResponse>{
-                    message: 'Payment methods',
-                    data: paymentMethods,
+                    message: 'Shops',
+                    data: shops,
                     error: null,
                     success: true,
                 });
             } else {
                 res.json(<IClientResponse>{
-                    message: 'Not payment methods yet',
+                    message: 'Not shops yet',
                     data: [],
                     error: null,
                     success: true,
@@ -77,17 +87,17 @@ export class PaymentMethodControllers {
             const { id } = req.params;
 
             if (mongoose.isValidObjectId(id)) {
-                const paymentMethod = await PaymentMethod.findById(id);
+                const shop = await Shop.findById(id);
 
-                if (paymentMethod) {
+                if (shop) {
                     res.json(<IClientResponse>{
-                        message: 'Payment method',
-                        data: paymentMethod,
+                        message: 'Shop',
+                        data: shop,
                         error: null,
                         success: true,
                     });
                 } else {
-                    throw error.NotFound('Payment method not found');
+                    throw error.NotFound('Shop not found');
                 }
             } else {
                 throw error.NotAcceptable('Invalid id');
@@ -106,27 +116,25 @@ export class PaymentMethodControllers {
             const { id } = req.params;
 
             if (mongoose.isValidObjectId(id)) {
-                const result =
-                    await JOIPaymentMethodValidation.update.validateAsync(
-                        req.body
-                    );
+                const result = await JOIShopValidation.update.validateAsync(
+                    req.body
+                );
 
-                const updatedPaymentMethod =
-                    await PaymentMethod.findByIdAndUpdate(
-                        id,
-                        { ...result },
-                        { new: true }
-                    );
+                const updatedShop = await Shop.findByIdAndUpdate(
+                    id,
+                    { ...result },
+                    { new: true }
+                );
 
-                if (updatedPaymentMethod) {
+                if (updatedShop) {
                     res.json(<IClientResponse>{
-                        message: 'Payment method saved',
-                        data: updatedPaymentMethod,
+                        message: 'Shop saved',
+                        data: updatedShop,
                         error: null,
                         success: true,
                     });
                 } else {
-                    throw error.NotFound('Payment method not found');
+                    throw error.NotFound('Shop not found');
                 }
             } else {
                 throw error.NotAcceptable('Invalid id');
@@ -145,7 +153,7 @@ export class PaymentMethodControllers {
             const { id } = req.params;
 
             if (mongoose.isValidObjectId(id)) {
-                const deleted = await PaymentMethod.findByIdAndDelete(id);
+                const deleted = await Shop.findByIdAndDelete(id);
 
                 if (deleted) {
                     res.json(<IClientResponse>{
@@ -155,7 +163,7 @@ export class PaymentMethodControllers {
                         success: true,
                     });
                 } else {
-                    throw error.NotFound('Payment method not found');
+                    throw error.NotFound('Shop not found');
                 }
             } else {
                 throw error.NotAcceptable('Invalid id');
