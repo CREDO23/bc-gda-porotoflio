@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as error from 'http-errors';
 import * as express from 'express';
-import mongoose from 'mongoose';
+import mongoose, { isValidObjectId } from 'mongoose';
 import { Shop } from '../models/shop';
-import { JOIShopValidation } from '../helpers/joi/shop';
+import { JOIShopValidation } from '../services/validations/shop';
 import { ShopCategory } from '../models/shopCategory';
+import { promises } from 'nodemailer/lib/xoauth2';
+import { PaymentMethod } from '../models/paymentMethod';
 
 export class ShopControllers {
     static create = async (
@@ -26,19 +28,59 @@ export class ShopControllers {
             if (!isExist[0]) {
                 const { category: shopCategory, paymentMethods } = result;
 
-                const category = await ShopCategory.findById(shopCategory);
+                if (mongoose.isValidObjectId(shopCategory)) {
+                    const category = await ShopCategory.findById(shopCategory);
 
-                if (!category) {
-                    throw error.NotFound('Shop category not found');
+                    if (!category) {
+                        throw error.NotFound('Shop category not found');
+                    }
+                } else {
+                    throw error.NotAcceptable('Invalid category shop id');
+                }
+
+                const isPymentMehodsIdOk = paymentMethods.every((id) => {
+                    if (isValidObjectId(id)) {
+                        return true;
+                    } else {
+                        throw error.NotAcceptable(
+                            `${id} is not a valid paymentMethod id`
+                        );
+                    }
+                });
+
+                if (isPymentMehodsIdOk) {
+                    await Promise.all(
+                        paymentMethods.map(async (id) => {
+                            const paymentMethod = await PaymentMethod.findById(
+                                id
+                            );
+
+                            if (!paymentMethod) {
+                                throw error.NotFound(
+                                    `The paymentMethod ${id} is not found`
+                                );
+                            }
+                        })
+                    );
                 }
 
                 const newShop = new Shop({ ...result, owner: req.user.id });
 
                 const savedShop = await newShop.save();
 
+                const populated = await savedShop.populate([
+                    { path: 'owner', select: 'username email roles' },
+                    {
+                        path: 'category',
+                    },
+                    {
+                        path: 'paymentMethods',
+                    },
+                ]);
+
                 res.json(<IClientResponse>{
                     message: 'Shop created successfully',
-                    data: savedShop,
+                    data: populated,
                     error: null,
                     success: true,
                 });

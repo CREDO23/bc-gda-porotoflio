@@ -51,7 +51,7 @@ export default class App {
         this.app.get('/', this.baseRoute);
         this.app.use('/api/auth/', authRouter);
         this.app.use('/api/password', passwordRouter);
-        // this.app.use(tokenGuard);
+        this.app.use(tokenGuard);
         this.app.use('/api/users/', userRouter);
         this.app.use('/api/shop_categories', shopCategoriesRouter);
         this.app.use('/api/payment_methods', paymentMethodsRouter);

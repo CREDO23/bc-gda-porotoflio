@@ -3,7 +3,7 @@ import * as error from 'http-errors';
 import * as express from 'express';
 import { ShopCategory } from '../models/shopCategory';
 import mongoose from 'mongoose';
-import { JOIShopCategoryValidation } from '../helpers/joi/shopCategory';
+import { JOIShopCategoryValidation } from '../services/validations/shopCategory';
 
 export class ShopCategoryControllers {
     static create = async (
