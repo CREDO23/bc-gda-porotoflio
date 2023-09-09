@@ -3,7 +3,7 @@ import * as error from 'http-errors';
 import * as express from 'express';
 import { PaymentMethod } from '../models/paymentMethod';
 import mongoose from 'mongoose';
-import { JOIPaymentMethodValidation } from '../helpers/joi/paymentMethod';
+import { JOIPaymentMethodValidation } from '../services/validations/paymentMethod';
 
 export class PaymentMethodControllers {
     static create = async (

@@ -3,7 +3,7 @@ import * as error from 'http-errors';
 import * as express from 'express';
 import { User } from '../models/user';
 import { JWTHelpers } from '../helpers/jwt';
-import { JOIUserValidation } from '../helpers/joi/joi';
+import { JOIUserValidation } from '../services/validations/user';
 import { BcryptHelpers } from '../helpers/bcrypt';
 import welcomeMail from '../helpers/nodemailer/welcome';
 
