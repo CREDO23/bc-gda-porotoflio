@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as error from 'http-errors';
 import * as express from 'express';
-import mongoose, { isValidObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import { Shop } from '../models/shop';
 import { JOIShopValidation } from '../services/validations/shop';
 import { ShopCategory } from '../models/shopCategory';
-import { promises } from 'nodemailer/lib/xoauth2';
 import { PaymentMethod } from '../models/paymentMethod';
+import { CheckDocumentExistence } from '../services/isDocumentExist';
+import { removeDuplicatedItem } from '../helpers/removeDuplicated';
 
 export class ShopControllers {
     static create = async (
@@ -19,74 +20,85 @@ export class ShopControllers {
                 req.body
             );
 
-            const isExist = await Shop.find({
-                name: {
-                    $regex: new RegExp(result.name, 'i'),
-                },
-            });
+            const {
+                category: shopCategory,
+                name: shopName,
+                paymentMethods,
+            } = result;
+            const cleanPaymentMethods = removeDuplicatedItem(
+                paymentMethods as unknown as string[]
+            );
 
-            if (!isExist[0]) {
-                const { category: shopCategory, paymentMethods } = result;
+            // chech if the shop exists
+            const shopExistence = new CheckDocumentExistence(Shop);
 
-                if (mongoose.isValidObjectId(shopCategory)) {
-                    const category = await ShopCategory.findById(shopCategory);
+            const isShopExists = await shopExistence.byField('name', shopName);
 
-                    if (!category) {
-                        throw error.NotFound('Shop category not found');
-                    }
-                } else {
-                    throw error.NotAcceptable('Invalid category shop id');
-                }
+            if (isShopExists) {
+                throw error.Conflict(
+                    `Shop with name ${shopName} already exists`
+                );
+            }
 
-                const isPymentMehodsIdOk = paymentMethods.every((id) => {
-                    if (isValidObjectId(id)) {
-                        return true;
-                    } else {
-                        throw error.NotAcceptable(
-                            `${id} is not a valid paymentMethod id`
+            // check if the shop category exists
+            const shopCategoryExistence = new CheckDocumentExistence(
+                ShopCategory
+            );
+
+            const isCategoryExist = await shopCategoryExistence.byId(
+                shopCategory
+            );
+
+            if (!isCategoryExist) {
+                throw error.NotFound(
+                    `The category "${shopCategory}" is not found`
+                );
+            }
+
+            // check if the payment methods exist
+            const paymentMethodExistence = new CheckDocumentExistence(
+                PaymentMethod
+            );
+
+            await Promise.all(
+                cleanPaymentMethods.map(async (paymentMethodId) => {
+                    const isPayMethExist = await paymentMethodExistence.byId(
+                        paymentMethodId
+                    );
+
+                    if (!isPayMethExist) {
+                        throw error.NotFound(
+                            `The payment method "${paymentMethodId}" is not found`
                         );
                     }
-                });
+                })
+            );
 
-                if (isPymentMehodsIdOk) {
-                    await Promise.all(
-                        paymentMethods.map(async (id) => {
-                            const paymentMethod = await PaymentMethod.findById(
-                                id
-                            );
+            // create and save the shop
+            const newShop = new Shop({
+                ...result,
+                owner: req.user.id,
+                paymentMethods: cleanPaymentMethods,
+            });
 
-                            if (!paymentMethod) {
-                                throw error.NotFound(
-                                    `The paymentMethod ${id} is not found`
-                                );
-                            }
-                        })
-                    );
-                }
+            const savedShop = await newShop.save();
 
-                const newShop = new Shop({ ...result, owner: req.user.id });
+            const populated = await savedShop.populate([
+                { path: 'owner', select: 'username email roles' },
+                {
+                    path: 'category',
+                },
+                {
+                    path: 'paymentMethods',
+                },
+            ]);
 
-                const savedShop = await newShop.save();
-
-                const populated = await savedShop.populate([
-                    { path: 'owner', select: 'username email roles' },
-                    {
-                        path: 'category',
-                    },
-                    {
-                        path: 'paymentMethods',
-                    },
-                ]);
-
-                res.json(<IClientResponse>{
-                    message: 'Shop created successfully',
-                    data: populated,
-                    error: null,
-                    success: true,
-                });
-            } else {
-                throw error.Conflict('Shop already exist');
-            }
+            res.json(<IClientResponse>{
+                message: 'Shop created successfully',
+                data: populated,
+                error: null,
+                success: true,
+            });
         } catch (error) {
             next(error);
         }

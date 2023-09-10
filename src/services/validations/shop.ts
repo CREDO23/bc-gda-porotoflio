@@ -7,7 +7,7 @@ export class JOIShopValidation {
         category: joi.string().required(),
 
         description: joi.string(),
-        imageUrl: joi.string(),
+        image: joi.string(),
 
         gallery: joi.array().items(joi.string()),
         paymentMethods: joi.array().items(joi.string()).required(),
