@@ -22,7 +22,7 @@ export const permissionGuard =
                 const userRoles = (await User.findById(userId)).roles;
 
                 const hasPermission = userRoles.some((value) =>
-                    allowed.includes(value)
+                    allowed.includes(value as unknown as string)
                 );
 
                 if (hasPermission) {
