@@ -21,15 +21,17 @@ export class JOIShopValidation {
 
     static update = joi.object({
         shopName: joi.string(),
-
         shopCategory: joi.string(),
-
         description: joi.string(),
         imageUrl: joi.string(),
-
-        gallery: joi.array().items(joi.string()),
-        paymentMethods: joi.array().items(joi.string()),
-        products: joi.array().items(joi.string()),
         status: joi.string().valid('CREATED', 'PUBLISHED'),
+
+        // gallery: joi.array().items(joi.string()),
+        // paymentMethods: joi.array().items(joi.string()),
+        // products: joi.array().items(joi.string()),
     });
+
+    static paymentMethods = joi.string().required();
+
+    static gallery = joi.array().items(joi.string());
 }
