@@ -5,12 +5,9 @@ export const removeDuplicatedItem = (
     const newItems = [];
 
     for (let item of items) {
-        console.log(typeof item);
         if (typeof item !== 'number') {
             item = String(item);
         }
-
-        console.log(existingItems);
 
         if (!existingItems[item]) {
             existingItems[item] = true;

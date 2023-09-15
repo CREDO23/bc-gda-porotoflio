@@ -6,10 +6,13 @@ import { Shop } from '../models/shop';
 import { JOIShopValidation } from '../services/validations/shop';
 import { ShopCategory } from '../models/shopCategory';
 import { PaymentMethod } from '../models/paymentMethod';
-import { CheckDocumentExistence } from '../services/isDocumentExist';
+import { DocumentExistenceService } from '../services/isDocumentExist';
 import { removeDuplicatedItem } from '../helpers/removeDuplicated';
+import { DocumentGetterService } from '../services/getDocument';
 
 export class ShopControllers {
+    private static getDocument = new DocumentGetterService(Shop);
+
     static create = async (
         req: IUserRequest,
         res: express.Response,
@@ -25,14 +28,17 @@ export class ShopControllers {
                 name: shopName,
                 paymentMethods,
             } = result;
+
             const cleanPaymentMethods = removeDuplicatedItem(
                 paymentMethods as unknown as string[]
             );
 
             // chech if the shop exists
-            const shopExistence = new CheckDocumentExistence(Shop);
+            const shopExistence = new DocumentExistenceService(Shop);
 
-            const isShopExists = await shopExistence.byField('name', shopName);
+            const isShopExists = await shopExistence.withQuery({
+                name: { $regex: new RegExp(shopName, 'i') },
+            });
 
             if (isShopExists) {
                 throw error.Conflict(
@@ -41,7 +47,7 @@ export class ShopControllers {
             }
 
             // check if the shop category exists
-            const shopCategoryExistence = new CheckDocumentExistence(
+            const shopCategoryExistence = new DocumentExistenceService(
                 ShopCategory
             );
 
@@ -56,7 +62,7 @@ export class ShopControllers {
             }
 
             // check if the payment methods exist
-            const paymentMethodExistence = new CheckDocumentExistence(
+            const paymentMethodExistence = new DocumentExistenceService(
                 PaymentMethod
             );
 
@@ -110,7 +116,7 @@ export class ShopControllers {
         next: express.NextFunction
     ): Promise<void> => {
         try {
-            const shops = await Shop.find({});
+            const shops = await this.getDocument.all();
 
             if (shops.length) {
                 res.json(<IClientResponse>{
@@ -140,22 +146,14 @@ export class ShopControllers {
         try {
             const { id } = req.params;
 
-            if (mongoose.isValidObjectId(id)) {
-                const shop = await Shop.findById(id);
+            const shop = await this.getDocument.byId(id);
 
-                if (shop) {
-                    res.json(<IClientResponse>{
-                        message: 'Shop',
-                        data: shop,
-                        error: null,
-                        success: true,
-                    });
-                } else {
-                    throw error.NotFound('Shop not found');
-                }
-            } else {
-                throw error.NotAcceptable('Invalid id');
-            }
+            res.json(<IClientResponse>{
+                message: 'Shop',
+                data: shop,
+                error: null,
+                success: true,
+            });
         } catch (error) {
             next(error);
         }
