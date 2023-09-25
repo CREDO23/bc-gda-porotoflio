@@ -53,9 +53,9 @@ export default class App {
         this.app.use('/api/password', passwordRouter);
         this.app.use(tokenGuard);
         this.app.use('/api/users/', userRouter);
-        this.app.use('/api/shop_categories', shopCategoriesRouter);
-        this.app.use('/api/payment_methods', paymentMethodsRouter);
-        this.app.use('/api/shops', shopRouter);
+        this.app.use('/api/shop_categories/', shopCategoriesRouter);
+        this.app.use('/api/payment_methods/', paymentMethodsRouter);
+        this.app.use('/api/shops/', shopRouter);
     }
 
     private errorsHandlers(): void {

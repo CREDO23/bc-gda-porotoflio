@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
@@ -18,16 +19,20 @@ export class DocumentExistenceService<MType> {
 
     byId = (id: mongoose.Types.ObjectId): Promise<string | boolean> =>
         new Promise<string | boolean>(async (resolve, reject) => {
-            if (mongoose.isValidObjectId(id)) {
-                const isExist = await this.model.findById(id);
+            try {
+                if (mongoose.isValidObjectId(id)) {
+                    const isExist = await this.model.findById(id);
 
-                if (isExist) {
-                    resolve(true);
+                    if (isExist) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
                 } else {
-                    resolve(false);
+                    reject(error.NotAcceptable(`"${id}" is not a valid id `));
                 }
-            } else {
-                reject(error.NotAcceptable(`"${id}" is not a valid id `));
+            } catch (error) {
+                reject(error);
             }
         });
 
@@ -35,12 +40,16 @@ export class DocumentExistenceService<MType> {
         query: mongoose.FilterQuery<MType>
     ): Promise<string | boolean> =>
         new Promise<string | boolean>(async (resolve, reject) => {
-            const isExist = await this.model.findOne(query);
+            try {
+                const isExist = await this.model.findOne(query);
 
-            if (isExist[0]) {
-                resolve(true);
-            } else {
-                resolve(false);
+                if (isExist) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            } catch (error) {
+                reject(error);
             }
         });
 }
