@@ -9,6 +9,8 @@ import { PaymentMethod } from '../models/paymentMethod';
 import { DocumentExistenceService } from '../services/isDocumentExist';
 import { removeDuplicatedItem } from '../helpers/removeDuplicated';
 import { DocumentGetterService } from '../services/getDocument';
+import { PaymentMethodService } from '../services/shop/paymentMethod';
+import { ImageGalleryService } from '../services/shop/imageGallery';
 
 export class ShopControllers {
     private static getDocument = new DocumentGetterService(Shop);
@@ -220,6 +222,115 @@ export class ShopControllers {
             } else {
                 throw error.NotAcceptable('Invalid id');
             }
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    static addPaymentMethod = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        try {
+            const { id: shopId } = req.params;
+
+            const result = await JOIShopValidation.paymentMethod.validateAsync(
+                req.body
+            );
+
+            const shop = await PaymentMethodService.add(
+                shopId,
+                result.paymentMethodIds
+            );
+
+            res.json(<IClientResponse>{
+                message: 'Payment Method (s) added successfully',
+                data: shop,
+                error: null,
+                success: true,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    static removePaymentMethod = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        try {
+            const { id: shopId } = req.params;
+
+            const result = await JOIShopValidation.paymentMethod.validateAsync(
+                req.body
+            );
+
+            const shop = await PaymentMethodService.remove(
+                shopId,
+                result.paymentMethodIds
+            );
+
+            res.json(<IClientResponse>{
+                message: 'Payment Method removed successfully',
+                data: shop,
+                error: null,
+                success: true,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    static addImgToGallery = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        try {
+            const { id: shopId } = req.params;
+
+            const result = await JOIShopValidation.gallery.validateAsync(
+                req.body
+            );
+
+            const shop = await ImageGalleryService.add(shopId, result.images);
+
+            res.json(<IClientResponse>{
+                message: 'Image added successfully',
+                data: shop,
+                error: null,
+                success: true,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    static removeImgFromGallery = async (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+    ) => {
+        try {
+            const { id: shopId } = req.params;
+
+            const result = await JOIShopValidation.gallery.validateAsync(
+                req.body
+            );
+
+            const shop = await ImageGalleryService.remove(
+                shopId,
+                result.images
+            );
+
+            res.json(<IClientResponse>{
+                message: 'Image(s) removed successfully',
+                data: shop,
+                error: null,
+                success: true,
+            });
         } catch (error) {
             next(error);
         }
